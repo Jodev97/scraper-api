@@ -30,7 +30,12 @@ services:
     depends_on:
       scraper-redis:
         condition: service_healthy
-    networks: [dokploy-network, scraper]
+    networks:
+      scraper: {}
+      dokploy-network:
+        # Unique DNS name on the shared network (plain service names like
+        # `scraper-api` / `app` can collide with other Dokploy projects).
+        aliases: [nopxus-scraper-api]
     restart: unless-stopped
     stop_grace_period: 10s
     # `expose` only documents the port inside the Docker networks.

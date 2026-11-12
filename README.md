@@ -135,6 +135,27 @@ docker compose up -d --build
 - Redis has no password because it lives on the private `scraper` network, which contains no other
   service.
 
+### Wiring with the Nopxus compose (Dokploy)
+
+Both stacks share the external `dokploy-network`. Give each side a unique alias, because every
+Dokploy compose tends to name its service `app`:
+
+```yaml
+# Nopxus compose, service `app`
+    networks:
+      internal: {}
+      default: {}
+      dokploy-network:
+        aliases: [nopxus-app]
+```
+
+- Nopxus → scraper: `SCRAPER_API_URL=http://nopxus-scraper-api:3000` + `SCRAPER_API_KEY`.
+- Scraper → Nopxus: `NOPXUS_WEBHOOK_URL=http://nopxus-app:3001/<webhook path>` + the shared
+  `NOPXUS_WEBHOOK_SECRET`.
+- Nopxus' Postgres/Redis stay on its private `internal` network, unreachable from the scraper.
+  Even if a service were reachable, the worker's SSRF guard rejects single-label Docker names and
+  private IPs.
+
 ## Environment variables
 
 Validated at startup; the process exits with a message listing every problem.
