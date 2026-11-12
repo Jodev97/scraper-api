@@ -56,6 +56,10 @@ COPY package.json ./
 RUN node node_modules/playwright/cli.js install --with-deps chromium \
     && rm -rf /var/lib/apt/lists/* \
     && chmod -R a+rX /ms-playwright
+USER root
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends procps \
+ && rm -rf /var/lib/apt/lists/*
 USER node
 HEALTHCHECK --interval=20s --timeout=5s --start-period=20s --retries=3 \
   CMD ["node", "dist/worker/healthcheck.js"]
